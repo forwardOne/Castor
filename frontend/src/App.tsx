@@ -1,5 +1,6 @@
 // frontend/src/App.tsx
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 
 function App() {
@@ -44,36 +45,40 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>Castor</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>
-            フェーズ選択:
-            <select value={phase} onChange={(e) => setPhase(e.target.value)} disabled={isLoading}>
-              <option value="default">Default (丁寧な応答)</option>
-              <option value="creative">Creative (創造的な応答)</option>
-              <option value="analyst_with_search">Analyst (JSON出力 + Google Search)</option>
-            </select>
-          </label>
-        </div>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="メッセージを入力してください..."
-          rows={4}
-          disabled={isLoading}
-        />
-        <button type="submit" disabled={isLoading || !message.trim()}>
-          {isLoading ? '送信中...' : '送信'}
-        </button>
-      </form>
+    <Routes>
+      <Route path="/" element={
+        <div className="App">
+          <h1>Castor</h1>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label>
+                フェーズ選択:
+                <select value={phase} onChange={(e) => setPhase(e.target.value)} disabled={isLoading}>
+                  <option value="default">Default (丁寧な応答)</option>
+                  <option value="creative">Creative (創造的な応答)</option>
+                  <option value="analyst_with_search">Analyst (JSON出力 + Google Search)</option>
+                </select>
+              </label>
+            </div>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="メッセージを入力してください..."
+              rows={4}
+              disabled={isLoading}
+            />
+            <button type="submit" disabled={isLoading || !message.trim()}>
+              {isLoading ? '送信中...' : '送信'}
+            </button>
+          </form>
 
-      <div className="response-box">
-        <h2>AI応答</h2>
-        <p style={{ whiteSpace: 'pre-wrap' }}>{response}</p>
-      </div>
-    </div>
+          <div className="response-box">
+            <h2>AI応答</h2>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{response}</p>
+          </div>
+        </div>
+      } />
+    </Routes>
   );
 }
 
