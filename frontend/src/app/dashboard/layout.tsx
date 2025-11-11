@@ -1,27 +1,26 @@
-import React from 'react';
-import { AppSidebar } from "@/components/app-sidebar"
+// frontend/src/app/dashboard/layout.tsx
+import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout() {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 px-4">
-          <div className="bg-muted/50 mx-auto h-full w-full max-w-3xl rounded-xl" >
-            {children}
-          </div>
-        </div>
-      </SidebarInset>
+      <div className="flex h-screen w-screen">
+        <AppSidebar />
+        <SidebarInset className="flex flex-col flex-1">
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background">
+            <div className="flex items-center gap-2 px-3">
+              <SidebarTrigger />
+              <h3 className="text-lg font-semibold">Dashboard</h3>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto p-6 bg-muted/30">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
