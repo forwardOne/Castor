@@ -9,8 +9,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 
@@ -21,11 +19,13 @@ interface ChatInputProps {
   setPhase: (value: string) => void;
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => void;
+  project: string; // project プロパティを追加
 }
 
 const phaseLists = [ "default", "creative", "analyst_with_search" ];
 
 export const ChatInput: React.FC<ChatInputProps> = ({
+  project, // project を受け取る
   phase,
   setPhase,
   input,
@@ -36,7 +36,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <form onSubmit={handleSubmit}>
 
-      <div className="flex flex-col rounded-2xl border shadow-lg bg-card p-2">
+      <div className="flex flex-col border border-muted rounded-2xl shadow-lg bg-card p-2">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -51,28 +51,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="text-sm font-semibold text-muted-foreground px-3 h-8"
+                  className="text-base font-semibold text-blue-500 hover:text-blue-500 px-3 h-8"
                 >
                   {phase}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-40">
-                <DropdownMenuLabel>Phase list</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                  {phaseLists.map((phaseOption) => (
-                    <DropdownMenuItem
-                      key={phaseOption}
-                      onClick={() => setPhase(phaseOption)}
-                    >
-                    {phaseOption}
-                  </DropdownMenuItem>
-                  ))}
+                {phaseLists.map((phaseOption) => (
+                  <DropdownMenuItem
+                    key={phaseOption}
+                    onClick={() => setPhase(phaseOption)}
+                  >
+                  {phaseOption}
+                </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
           
-          <div className="flex-grow flex items-center justify-end space-x-2 text-sm text-muted-foreground mr-2">
-            <span className="hidden sm:inline">Project: default</span>
+          <div className="flex-grow flex text-muted-foreground text-base font-semibold items-center justify-end space-x-2 mr-2">
+            <span className="hidden sm:inline">project: <span className="text-blue-500">{project}</span></span>
             <Separator orientation="vertical" className="h-4" />
           </div>
 

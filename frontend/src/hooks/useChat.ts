@@ -3,6 +3,7 @@ import type{ Message } from '../types/types';
 import { MessageRole } from '../types/types';
 
 export const useChat = () => {
+  const [project, setProject] = useState('default_project'); 
   const [phase, setPhase] = useState('default');
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,11 +14,11 @@ export const useChat = () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
-      id: crypto.randomUUID(), // ユニークなIDを生成
+      id: crypto.randomUUID(), // ユニークID生成
       role: MessageRole.USER, // 'user'の代わりにenumを使用
       content: input,
     };
-    setMessages((prevMessages) => [...prevMessages, userMessage]); // ユーザーメッセージを追加
+    setMessages((prevMessages) => [...prevMessages, userMessage]); 
     setInput(''); // 入力フィールドをクリア
 
     setIsLoading(true);
@@ -29,7 +30,7 @@ export const useChat = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage.content, phase }), 
+        body: JSON.stringify({ message: userMessage.content, phase, project }),
       });
 
       const data = await res.json();
@@ -63,6 +64,8 @@ export const useChat = () => {
   };
 
   return {
+    project,
+    setProject,
     phase,
     setPhase,
     input,

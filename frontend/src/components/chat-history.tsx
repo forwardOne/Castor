@@ -16,7 +16,7 @@ const WelcomeScreen: React.FC = () => (
         <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
             Hello, User
         </div>
-        <p className="text-2xl text-muted-foreground">How can I help you today?</p>
+        <p className="text-2xl text-muted-foreground">What "root" shall we hack today?</p>
     </div>
 );
 

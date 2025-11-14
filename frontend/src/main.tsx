@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './index.css';
+import './global.css';
 import DashboardLayout from './app/dashboard/layout';
 import HomePage from './app/pages/homepage';
 import ChatPage from './app/pages/chatpage';

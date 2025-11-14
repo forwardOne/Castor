@@ -2,16 +2,19 @@
 import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { useChat } from "@/hooks/useChat";
 
 export default function DashboardLayout() {
+  const { setProject } = useChat();
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-screen bg-sidebar">
-        <AppSidebar />
+        <AppSidebar setProject={setProject} />
         <SidebarInset>
           <header className="flex h-14 shrink-0 items-center bg-card rounded-tl-lg rounded-tr-lg gap-2">
             <div className="flex items-center gap-2 px-3">
-              <SidebarTrigger />
+              <SidebarTrigger className="" />
               <h2 className="text-lg text-card-foreground font-semibold">Castor</h2>
             </div>
           </header>

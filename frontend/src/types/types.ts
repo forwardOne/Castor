@@ -17,7 +17,6 @@ export interface ChatRequest {
   message: string;
 }
 
-// バックエンドのレスポンススキーマが不明なため、仮で定義
 export interface ChatResponse {
   response: string; // AIの応答メッセージ
   // 必要に応じて他のフィールドを追加
