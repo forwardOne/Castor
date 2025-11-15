@@ -12,16 +12,16 @@
 *   **拡張性・再現性の確保**: スキャン結果や解析結果を標準化されたJSON形式で保持し、後続処理やレポート生成に活用可能です。IDEからも起動出来、CLIやバックエンドモジュールとの統合を容易にし、将来的な自動化・CI/CD環境への適応も視野に入れています。
 
 利用の際は必ず自己責任で学習目的かつ提供された環境内に限定してください。一般のネットワーク環境に対して無許可でハッキング及びそれらに該当する侵害行為を行うのは犯罪です。
-
-![初期画面](images/initial_screen.png)
-
+<p align="center">
+<img width="784" height="552" alt="Image" src="https://github.com/user-attachments/assets/b891264b-96db-41b1-8bbe-e94ef1a94196" />
+</p>
 ## 機能一覧
 - AIとのチャットを通じたサイバーセキュリティ学習支援
 - チャット履歴の管理
 - Markdownおよびコードブロックの整形表示
 
 ### 回答例イメージ
-![セキュリティに関する回答](images/security_answer.png)
+<img width="392" height="275" alt="Image" src="https://github.com/user-attachments/assets/0c34d36e-6523-46a1-ab5d-8e85eae2756b" />
 
 ## 技術スタック
 
