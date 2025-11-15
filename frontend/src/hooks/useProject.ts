@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const useProject = (setProject: (project: string) => void) => {
+export const useProject = () => {
   const [projects, setProjects] = useState<string[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useState(false);
@@ -35,7 +35,7 @@ export const useProject = (setProject: (project: string) => void) => {
         setNewProjectName('');
         setIsCreateProjectDialogOpen(false);
         fetchProjects(); // プロジェクト作成後に一覧を再取得
-        setProject(newProjectName); // 新しく作成したプロジェクトを選択状態にする
+        // setProject(newProjectName); // This line is removed
       } else {
         console.error('Failed to create project');
       }

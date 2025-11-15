@@ -9,12 +9,6 @@ from pathlib import Path
 CHAT_SESSIONS_PATH = Path(__file__).parent.parent / "chat_sessions"
 CHAT_SESSIONS_PATH.mkdir(exist_ok=True)
 
-"""
-ファイル名の指定はphaseではなくfilenameでやる方がいいかも？
-save_messageではphase名を使ってファイル名を作成しているが、loadやdeleteではfilenameで指定した方が文脈上正しい
-送受信時にroleを明示的にする方がフロントでのユーザーかモデルかで表示分けするのが楽では？
-"""
-
 
 # --- Definitions ---
 def create_project(project: str) -> bool:
@@ -26,14 +20,14 @@ def create_project(project: str) -> bool:
     return True
 
 
-def _get_session_path(project: str, phase: str) -> Path:
+def _get_session_path(project: str, phase: str, session_id: str) -> Path:
     """
     セッションファイルパスを取得。プロジェクトフォルダが無ければ作成
     冗長的対応だが安全策をとる
     """
     path = CHAT_SESSIONS_PATH / project
     path.mkdir(parents=True, exist_ok=True)
-    return path / f"{phase}.json"
+    return path / f"{phase}_{session_id}.json"
 
 
 def get_projects_list() -> List[str]:
@@ -45,37 +39,33 @@ def get_projects_list() -> List[str]:
 
 def get_histories_list(project: str) -> List[str]:
     """
-    既存履歴ファイル一覧を取得
+    既存プロジェクト内の履歴ファイル一覧を取得
     """
     path = CHAT_SESSIONS_PATH / project
     if not path.exists():
         return []
-    return [f.name for f in CHAT_SESSIONS_PATH.glob("*.json")]
+    return [f.name for f in path.glob("*.json")]
 
 
-def load_history(project: str, phase: str) -> List[dict]:
+def load_history(project: str, phase: str, session_id: str) -> List[dict]:
     """
-    指定の履歴ファイルを読み込み、Gemini互換フォーマットに変換
+    指定の履歴ファイルを読み込み、Gemini互換フォーマットで返す
     """
-    path = _get_session_path(project, phase) # ファイルパスはfilenameで管理する方がいいかも
+    path = _get_session_path(project, phase, session_id)
     if not path.exists():
         return []
     try:
         with open(path, "r", encoding="utf-8") as f:
-            messages = json.load(f)
-        # Gemini互換フォーマットに変換
-        return [
-            {"role": msg["role"], "parts": [msg["text"]]} for msg in messages
-        ]
+            return json.load(f) #保存段階で互換フォーマットに変えたのでそのまま読む
     except Exception:
         return []
 
 
-def save_message(project: str, phase: str, role: str, text: str):
+def save_message(project: str, phase: str, session_id: str, role: str, text: str):
     """
-    メッセージを履歴ファイルに保存
+    メッセージを履歴ファイルに対してGemini互換フォーマットで保存。
     """
-    path = _get_session_path(project, phase)
+    path = _get_session_path(project, phase, session_id)
     messages = []
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
@@ -83,8 +73,13 @@ def save_message(project: str, phase: str, role: str, text: str):
                 messages = json.load(f)
             except json.JSONDecodeError:
                 messages = []
-
-    messages.append({"role": role, "text": text})
+    
+    new_message = {
+        "role": role,
+        "parts": [{"text": text}] #保存段階で互換フォーマットに変えた
+    }
+    messages.append(new_message)
+    
     with open(path, "w", encoding="utf-8") as f:
         json.dump(messages, f, ensure_ascii=False, indent=2)
 
@@ -98,10 +93,10 @@ def delete_project(project: str) -> bool:
     return True
 
 
-def delete_history(project: str, filename: str) -> bool:
+def delete_history(project: str, session_id: str) -> bool:
     """
     指定プロジェクト内の履歴ファイルを削除
     """
-    path = CHAT_SESSIONS_PATH / project / filename
+    path = CHAT_SESSIONS_PATH / project / session_id
     os.remove(path)
     return True

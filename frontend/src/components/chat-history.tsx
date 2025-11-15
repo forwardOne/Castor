@@ -26,17 +26,17 @@ const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
 
   // ユーザーメッセージ(右寄せ、最大幅設定、背景色)
   const userContainerClass = 'justify-end';
-  const userBubbleClass = 'max-w-xs lg:max-w-md gap-2 rounded-lg px-3 py-2 bg-primary text-primary-foreground ml-auto';
+  const userBubbleClass = 'max-w-xs lg:max-w-md gap-2 rounded-lg px-3 py-3 mr-2 text-[17px] bg-accent text-accent-foreground ml-auto';
 
   // モデルメッセージ(左寄せ、最大幅なし、背景色)
   const modelContainerClass = 'justify-start';
-  const modelBubbleClass = 'w-full gap-2 rounded-lg px-3 py-2 bg-muted text-muted-foreground'; 
+  const modelBubbleClass = 'w-full gap-2 rounded-lg px-2 py-2 mr-5 text-[17px] bg-card text-card-foreground'; 
 
   return (
-    <div className={`flex mb-4 ${isUser ? userContainerClass : modelContainerClass}`}>
+    <div className={`flex mb-6 ${isUser ? userContainerClass : modelContainerClass}`}>
       
       <div
-        className={`px-4 py-2 ${
+        className={`px-2 py-2 ${
           isUser
             ? userBubbleClass
             : modelBubbleClass
@@ -65,7 +65,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isLoading })
 
   return (
     <ScrollArea className="flex-1">
-      <div className="flex flex-col space-y-4 p-4">
+      <div className="flex flex-col space-y-4">
         {messages.map((msg) => (
           <ChatMessageBubble key={msg.id} message={msg} />
         ))}
