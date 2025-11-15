@@ -8,6 +8,7 @@ from google import genai
 from google.genai import types
 from .storage_logic import load_history
 import asyncio
+from typing import List
 
 load_dotenv()
 
@@ -18,9 +19,9 @@ api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key or api_key == "YOUR_API_KEY_FROM_GOOGLE_AI_STUDIO":
     raise ValueError("APIキーが.envファイルに設定されていないか、無効です。")
 
-client = genai.Client(api_key=api_key)
-chat = None #global chat object
-chat_lock = asyncio.Lock() #asyncio lock for chat object
+client = genai.Client(api_key=api_key) # async_client = client.aio を使うか検討中
+chat = None
+chat_lock = asyncio.Lock()
 
 
 # --- PromptConfigs ---
@@ -34,7 +35,6 @@ except FileNotFoundError:
     print(f"ERROR: Config file not found at {CONFIG_FILE_PATH}.")
 except json.JSONDecodeError:
     print(f"ERROR: Config file is not valid JSON.")
-
 
 
 # --- Definitions ---
@@ -54,30 +54,41 @@ def get_generation_content_config(phase: str):
         response_mime_type=config_data.get("response_mime_type", "text/plain"),
         system_instruction=config_data.get(
             "system_instruction",
-            "あなたは丁寧で正確な情報を提供するアシスタントです。"
+            "あなたは丁寧で正確な情報を提供するアシスタントです。ユーザーの抽象的な質問に応じます。セキュリティやハッキングに関する話題であれば経験豊富なセキュリティアナリストへの橋渡しになる回答をしてください。必要に応じて最新情報にアクセスしてください。回答はマークダウン形式でお願いします。"
         ),
     )
     return generate_content_config
 
 
-async def send_chat_message(message: str, phase: str = "default"):
+async def create_or_resume_session(phase: str, history: List[dict] = None):
     """
-    メッセージ送信、応答取得、非SSE
-    履歴保存はエンドポイント側
+    グローバルなチャットセッションを新規作成、または履歴で再構築する。
+    セッションが切り替わる3つのイベント（起動時、新規チャット、再開時）で使用する。
     """
     global chat
+    
+    # フェーズに応じた設定を取得
     config = get_generation_content_config(phase)
+    
     async with chat_lock:
-        response = await chat.send_message(message, config=config)
-        return response.text
+        # 履歴があれば、それを渡してセッションを再構築
+        # historyがNoneや空リストの場合は、新しいセッションとして動作する
+        chat = client.aio.chats.create(
+            model=GEMINI_MODEL,
+            config=config,
+            history=history or [],  # 履歴がNoneや空リストの場合は空のリストを渡す
+        )        
+    if history:
+        print(f"Chat session resumed with {len(history)} messages.")
+    else:
+        print("New chat session initialized.")
 
 
-def init_chat():
+async def init_chat_on_startup():
     """
-    チャットオブジェクト初期化
+    起動時初期セッション開始。
     """
-    global chat
-    chat = client.aio.chats.create(model=GEMINI_MODEL)
+    await create_or_resume_session(phase="default") 
     print("Chat session initialized.")
 
 
@@ -90,23 +101,13 @@ def reset_chat():
     print("Chat session reset.")
 
 
-async def apply_history_to_chat(project: str, phase: str):
+async def send_chat_message(message: str):
     """
-    保存されたチャット履歴をロード、セッションに反映（APIに送信）
+    メッセージ送信、応答取得、非SSE
+    履歴保存はエンドポイント側
     """
     global chat
-    history = load_history(project, phase)
     async with chat_lock:
-        for msg in history:
-            role = msg["role"]
-            text = msg["parts"][0] if "parts" in msg else msg["text"]
-
-            # AI発話は chat.send_message で再構築
-            if role == "user":
-                await chat.send_message(text)
-            elif role == "model":
-                # モデル側は履歴にだけ反映（Geminiでは明示的送信不要）
-                chat._history.append(types.Content(role="model", parts=[text]))
-
-    print(f"History applied for project='{project}', phase='{phase}'.")
+        response = await chat.send_message(message)
+        return response.text
 

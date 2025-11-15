@@ -1,13 +1,14 @@
 # backend/main.py
 # Endpoint definitions for FastAPI
+import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .schemas import ChatRequest, HistoryRequest, CreateProjectRequest
+from .schemas import ChatRequest, HistoryRequest, CreateProjectRequest, NewSessionRequest
 from .chat_logic import (
-    init_chat,
+    init_chat_on_startup,
     send_chat_message,
-    reset_chat,
-    apply_history_to_chat)
+    create_or_resume_session,
+    )
 from .storage_logic import (
     create_project, 
     load_history, 
@@ -35,7 +36,7 @@ app.add_middleware(
 
 
 # --- Init and Session Persistence ---
-init_chat() # from chat_logic
+init_chat_on_startup()
 
 
 # --- Endpoints ---
@@ -48,53 +49,71 @@ def root():
 async def chat_endpoint(request: ChatRequest):
     """
     メッセージ送信、応答取得、履歴保存、非SSE
-    send_chat_message
-    save_message
+    セッション確立前提
     """
     try:
-        response = await send_chat_message(message=request.message, phase=request.phase)
+        response = await send_chat_message(message=request.message)
         
-        save_message(request.project, request.phase, "user", request.message)
-        save_message(request.project, request.phase, "model", response)
+        save_message(request.project, request.phase, request.session_id, "user", request.message)
+        save_message(request.project, request.phase, request.session_id, "model", response)
         
         return {"response": response}
+    except ValueError as ve:
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"セッションエラー: {ve}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI応答エラー: {e}")
 
 
-@app.post("/chat/resume")
-async def resume_chat_endpoint(request: HistoryRequest):
+@app.post("/new_session")
+async def new_session_endpoint(request: NewSessionRequest):
     """
-    セッション再開：履歴をGeminiに反映（APIに送信）
-    load_history
-    apply_history_to_chat
+    グローバルチャットセッションをリセットし、新しいProject/Phaseの設定で初期化する。
     """
     try:
-        messages = load_history(request.project, request.phase)
-        if not messages:
+        # 履歴なしでセッションを再構築し、新しいフェーズ設定を適用
+        await create_or_resume_session(phase=request.phase, history=None)
+        return {"message": "New chat session initialized successfully.", "project": request.project, "phase": request.phase}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"新規セッション作成に失敗: {e}")
+
+
+@app.post("/resume_session")
+async def resume_session_endpoint(request: HistoryRequest):
+    """
+    保存された履歴をロードし、GenAI APIに反映してセッションを再構築
+    """
+    try:
+        history_data = load_history(request.project, request.phase, request.session_id)
+        if not history_data["messages"]:
             return {"status": "no_history", "message": "履歴が存在しません"}
 
-        await apply_history_to_chat(messages)
-        return {"status": "resumed", "message_count": len(messages)}
+        # ロードした履歴とフェーズ設定でグローバルセッションを再構築
+        await create_or_resume_session(phase=history_data["phase"], history=history_data["messages"])
+        return {"status": "resumed", "message_count": len(history_data["messages"])}
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"セッション再開失敗: {e}")
 
 
-@app.post("/chat/reset")
-def reset_chat_endpoint():
+@app.post("/load_history")
+async def load_history_endpoint(request: HistoryRequest):
     """
-    チャットセッションをリセット
-    reset_chat
+    履歴ファイルの内容をロードしてフロントに返す（GenAI APIに送信しない）
+    画面表示用
     """
-    reset_chat()
-    return {"message": "Chat session has been reset."}
+    try:
+        history_data = load_history(request.project, request.phase, request.session_id)
+        return history_data # オブジェクト全体を返す
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"履歴ロード失敗: {e}")
 
 
 @app.post("/create_project")
 def create_project_endpoint(request: CreateProjectRequest):
     """
     プロジェクト新規作成
-    create_project
     """
     try:
         created = create_project(request.project)
@@ -103,24 +122,10 @@ def create_project_endpoint(request: CreateProjectRequest):
         raise HTTPException(status_code=500, detail=f"プロジェクト作成に失敗: {e}")
 
 
-@app.post("/load_history")
-async def load_history_endpoint(request: HistoryRequest):
-    """
-    履歴ファイルの内容をロードしてフロントに返す（APIに送信しない）
-    load_history
-    """
-    try:
-        messages = load_history(request.project, request.phase)
-        return {"history": messages}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"履歴ロード失敗: {e}")
-
-
 @app.get("/projects")
 def get_projects_endpoint():
     """
     既存プロジェクト一覧を取得
-    get_projects_list
     """
     try:
         return {"projects": get_projects_list()}
@@ -129,19 +134,18 @@ def get_projects_endpoint():
 
 
 @app.get("/projects/{project}/histories")
-def get_histories_endpoint(request: HistoryRequest):
+def get_histories_endpoint(project: str):
     """
     指定プロジェクトの履歴ファイル一覧を取得
-    get_histories_list
     """
     try:
-        return {"histories": get_histories_list(request.project)}
+        return {"histories": get_histories_list(project)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"履歴一覧の取得に失敗: {e}")
 
 
 @app.delete("/projects/{project}")
-def remove_project_endpoint(project: str): #出来ればPydantic Modelで統一したい
+def remove_project_endpoint(project: str):
     """
     指定プロジェクトフォルダを削除
     """
@@ -152,13 +156,14 @@ def remove_project_endpoint(project: str): #出来ればPydantic Modelで統一�
         raise HTTPException(status_code=500, detail=f"プロジェクト削除に失敗: {e}")
 
 
-@app.delete("/projects/{project}/histories/{filename}")
-def remove_history_endpoint(project: str, filename: str): #出来ればPydantic Modelで統一したい
+@app.delete("/projects/{project}/histories/{session_id}")
+def remove_history_endpoint(project: str, session_id: str):
     """
     指定プロジェクト内の履歴ファイルを削除
+    仮作成
     """
     try:
-        deleted = delete_history(project, filename)
-        return {"deleted": deleted, "file": filename}
+        deleted = delete_history(project, session_id)
+        return {"deleted": deleted, "file": session_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"履歴ファイル削除に失敗しました: {e}")
