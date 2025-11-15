@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Calendar, Home, Inbox, Search, Settings, PlusIcon, MessageSquarePlus } from "lucide-react"
+import { FolderPlus, SquarePen, Shield } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -28,41 +28,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-]
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface AppSidebarProps {
   startNewChat: (project: string, phase: string) => void;
+  displayHistory: (project: string, phase: string, sessionId: string) => void;
 }
 
-export function AppSidebar({ startNewChat }: AppSidebarProps) {
+export function AppSidebar({ startNewChat, displayHistory }: AppSidebarProps) {
   // For "New Project"
   const {
     projects,
@@ -77,7 +55,18 @@ export function AppSidebar({ startNewChat }: AppSidebarProps) {
   const [isNewChatDialogOpen, setIsNewChatDialogOpen] = React.useState(false);
   const [selectedProject, setSelectedProject] = React.useState<string>("");
   const [selectedPhase, setSelectedPhase] = React.useState<string>("default");
-  const phaseLists = [ "default", "creative", "analyst_with_search" ];
+
+  // コンフィグ名が増えたらここに追記
+  const phaseLists = [
+    "default",
+    "1_Recon_Enumeration",
+    "2_Vulnerability_Identification",
+    "3_Exploitation Preparation",
+    "4_Initial_Foothold",
+    "5_Exploitation",
+    "6_Privilege_Escalation",
+    "7_Flag_Capture"
+  ];
 
   const handleStartChat = () => {
     if (!selectedProject) {
@@ -91,42 +80,79 @@ export function AppSidebar({ startNewChat }: AppSidebarProps) {
 
   React.useEffect(() => {
     if (projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0]);
+      setSelectedProject(projects[0].name); // projectData.name を使う
     }
   }, [projects, selectedProject]);
 
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarContent className="bg-sidebar">
+        <div className="group flex h-14 shrink-0 items-center justify-center gap-2 px-4 border-b border-border">
+          <Shield className="h-6 w-6 text-sidebar-foreground" />
+          <span className="group-data-[state=collapsed]:hidden">
+            <h1 className="inline-block text-xl font-bold text-sidebar-foreground">Castor</h1>
+            <span className="ml-2 text-xs text-muted-foreground">ver1.0.0</span>
+          </span>
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground">Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsNewChatDialogOpen(true)}>
+                    <SquarePen className="mr-2 h-4 w-4" />
+                    New Chat
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsCreateProjectDialogOpen(true)}>
+                    <FolderPlus className="mr-2 h-4 w-4" />
+                    New Project
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Action Buttons */}
-        <SidebarGroup>
-          <SidebarGroupContent className="grid gap-2">
-            <Button variant="outline" className="w-full justify-start" onClick={() => setIsNewChatDialogOpen(true)}>
-              <MessageSquarePlus className="mr-2 h-4 w-4" />
-              New Chat
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setIsCreateProjectDialogOpen(true)}>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              New Project
-            </Button>
+        {/* Histories Group */}
+        <SidebarGroup className="flex-1 overflow-y-auto">
+          <SidebarGroupLabel className="text-sidebar-foreground">Histories</SidebarGroupLabel>
+          <SidebarGroupContent className="group-data-[state=collapsed]:hidden">
+            {projects.length === 0 ? (
+              <p className="text-sm text-muted-foreground p-2">No projects found.</p>
+            ) : (
+              <Accordion type="multiple" className="w-full">
+                {projects.map((projectData) => (
+                  <AccordionItem key={projectData.name} value={projectData.name}>
+                    <AccordionTrigger className="px-2 py-1.5 text-sm font-medium hover:no-underline">
+                      {projectData.name}
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-1">
+                      {projectData.histories.length === 0 ? (
+                        <p className="text-xs text-muted-foreground px-2 py-1">No history.</p>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          {projectData.histories.map((historyItem) => (
+                            <Button
+                              key={historyItem.id}
+                              variant="ghost"
+                              className="w-full justify-start h-auto px-2 py-1 text-xs"
+                              onClick={() => displayHistory(projectData.name, historyItem.phase, historyItem.id)}
+                            >
+                              <span className="truncate">{historyItem.phase}_{historyItem.id.substring(0, 8)}...</span>
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -173,7 +199,7 @@ export function AppSidebar({ startNewChat }: AppSidebarProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {projects.map((p) => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
+                    <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

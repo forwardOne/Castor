@@ -8,7 +8,7 @@ export enum MessageRole {
 export interface Message {
   id: string;
   role: MessageRole;
-  content: string;
+  parts: { text: string }[]; // content から parts に変更
 }
 
 export interface ChatRequest {

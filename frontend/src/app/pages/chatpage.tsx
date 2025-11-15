@@ -13,6 +13,9 @@ type ChatContextType = {
   messages: Message[];
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => void;
+  displayedHistory: { project: string; phase: string; sessionId: string; messages: Message[] } | null;
+  resumeDisplayedHistory: () => void;
+  cancelHistoryDisplay: () => void;
 };
 
 function ChatPage() {
@@ -24,23 +27,29 @@ function ChatPage() {
     messages,
     isLoading,
     handleSubmit,
+    displayedHistory,
+    resumeDisplayedHistory,
+    cancelHistoryDisplay,
   } = useOutletContext<ChatContextType>();
 
   return (
     <div className="flex flex-col h-full w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-1 min-h-0 overflow-y-auto">
-        <ChatHistory messages={messages} isLoading={isLoading} />
+      <div className="flex flex-1 min-h-0 overflow-y-auto justify-center">
+        <ChatHistory messages={displayedHistory ? displayedHistory.messages : messages} isLoading={isLoading} />
       </div>
 
       <div className="py-4 flex-shrink-0">
         <ChatInput
-          phase={phase || 'default'}
+          phase={displayedHistory ? displayedHistory.phase : (phase || 'default')}
           input={input}
           setInput={setInput}
           isLoading={isLoading}
           handleSubmit={handleSubmit}
-          project={project || ''}
-          disabled={!project}
+          project={displayedHistory ? displayedHistory.project : (project || '')}
+          disabled={!project} // アクティブなチャットセッションがない場合のみ無効化
+          displayedHistory={displayedHistory}
+          resumeDisplayedHistory={resumeDisplayedHistory}
+          cancelHistoryDisplay={cancelHistoryDisplay}
         />
       </div>
     </div>

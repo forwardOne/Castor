@@ -47,41 +47,51 @@ def get_histories_list(project: str) -> List[str]:
     return [f.name for f in path.glob("*.json")]
 
 
-def load_history(project: str, phase: str, session_id: str) -> List[dict]:
+def load_history(project: str, phase: str, session_id: str) -> dict:
     """
-    指定の履歴ファイルを読み込み、Gemini互換フォーマットで返す
+    指定の履歴ファイルを読み込み、ファイル全体のオブジェクトを返す。
+    ファイル形式は{phase: str, messages: List[dict]}を想定。
     """
     path = _get_session_path(project, phase, session_id)
-    if not path.exists():
-        return []
+    if not path.exists() or os.path.getsize(path) == 0:
+        return {"phase": phase, "messages": []}
     try:
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f) #保存段階で互換フォーマットに変えたのでそのまま読む
+            data = json.load(f)
+            # 新しいオブジェクト形式の場合
+            if isinstance(data, dict) and "messages" in data:
+                return data
+            else:
+                # 形式が不正な場合は初期化
+                return {"phase": phase, "messages": []}
     except Exception:
-        return []
+        return {"phase": phase, "messages": []}
 
 
 def save_message(project: str, phase: str, session_id: str, role: str, text: str):
     """
     メッセージを履歴ファイルに対してGemini互換フォーマットで保存。
+    ファイル全体を{phase: str, messages: List[dict]}の形式で保存する。
     """
     path = _get_session_path(project, phase, session_id)
-    messages = []
+    data = {"phase": phase, "messages": []}
+    
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             try:
-                messages = json.load(f)
+                data = json.load(f)
             except json.JSONDecodeError:
-                messages = []
-    
+                # ファイルが壊れている場合は初期化
+                data = {"phase": phase, "messages": []}
+
     new_message = {
         "role": role,
-        "parts": [{"text": text}] #保存段階で互換フォーマットに変えた
+        "parts": [{"text": text}]
     }
-    messages.append(new_message)
+    data["messages"].append(new_message)
     
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(messages, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def delete_project(project: str) -> bool:

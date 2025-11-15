@@ -12,7 +12,10 @@ interface ChatInputProps {
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => void;
   project: string;
-  disabled?: boolean; //
+  disabled?: boolean;
+  displayedHistory: { project: string; phase: string; sessionId: string; messages: any[] } | null;
+  resumeDisplayedHistory: () => void;
+  cancelHistoryDisplay: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -21,10 +24,33 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isLoading,
   handleSubmit,
   disabled,
+  displayedHistory,
+  resumeDisplayedHistory,
+  cancelHistoryDisplay,
 }) => {
   const placeholderText = disabled
     ? "サイドバーから「New Chat」を選択してチャットを開始してください"
     : "メッセージを入力してください...";
+
+  if (displayedHistory) {
+    return (
+      <div className="flex flex-col border border-muted rounded-2xl shadow-lg bg-card p-2">
+        <div className="flex flex-col items-center justify-center p-4 gap-2">
+          <p className="text-muted-foreground text-center">
+            履歴を表示中: プロジェクト「{displayedHistory.project}」フェーズ「{displayedHistory.phase}」
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={resumeDisplayedHistory} disabled={isLoading}>
+              セッションを復元
+            </Button>
+            <Button variant="outline" onClick={cancelHistoryDisplay} disabled={isLoading}>
+              キャンセル
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>

@@ -1,24 +1,59 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+// データ構造の型定義
+export interface HistoryItem {
+  id: string; // session_id
+  phase: string;
+}
+
+export interface ProjectWithHistories {
+  name: string;
+  histories: HistoryItem[];
+}
 
 export const useProject = () => {
-  const [projects, setProjects] = useState<string[]>([]);
+  const [projects, setProjects] = useState<ProjectWithHistories[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useState(false);
 
-  // プロジェクト一覧を取得する関数
-  const fetchProjects = async () => {
+  // プロジェクトとそれぞれの履歴をすべて取得する関数
+  const fetchAllProjectsAndHistories = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:8000/projects');
-      if (res.ok) {
-        const data = await res.json();
-        setProjects(data.projects);
-      } else {
+      const projectsRes = await fetch('http://localhost:8000/projects');
+      if (!projectsRes.ok) {
         console.error('Failed to fetch projects');
+        return;
       }
+      const projectsData = await projectsRes.json();
+      const projectNames: string[] = projectsData.projects;
+
+      // 各プロジェクトの履歴を並行して取得
+      const projectsWithHistories = await Promise.all(
+        projectNames.map(async (name) => {
+          const historiesRes = await fetch(`http://localhost:8000/projects/${name}/histories`);
+          if (!historiesRes.ok) {
+            console.error(`Failed to fetch histories for project: ${name}`);
+            return { name, histories: [] };
+          }
+          const historiesData = await historiesRes.json();
+          
+          const histories: HistoryItem[] = historiesData.histories.map((filename: string) => {
+            const parts = filename.replace('.json', '').split('_');
+            const phase = parts[0];
+            const id = parts.slice(1).join('_');
+            return { id, phase };
+          });
+
+          return { name, histories };
+        })
+      );
+
+      setProjects(projectsWithHistories);
+
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error('Error fetching projects and histories:', error);
     }
-  };
+  }, []);
 
   // 新しいプロジェクトを作成する関数
   const handleCreateProject = async () => {
@@ -34,8 +69,7 @@ export const useProject = () => {
       if (res.ok) {
         setNewProjectName('');
         setIsCreateProjectDialogOpen(false);
-        fetchProjects(); // プロジェクト作成後に一覧を再取得
-        // setProject(newProjectName); // This line is removed
+        fetchAllProjectsAndHistories(); // プロジェクト作成後に一覧を再取得
       } else {
         console.error('Failed to create project');
       }
@@ -46,8 +80,8 @@ export const useProject = () => {
 
   // コンポーネントマウント時にプロジェクト一覧を取得
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    fetchAllProjectsAndHistories();
+  }, [fetchAllProjectsAndHistories]);
 
   return {
     projects,
@@ -56,6 +90,6 @@ export const useProject = () => {
     isCreateProjectDialogOpen,
     setIsCreateProjectDialogOpen,
     handleCreateProject,
-    fetchProjects,
+    fetchAllProjectsAndHistories,
   };
 };

@@ -85,13 +85,13 @@ async def resume_session_endpoint(request: HistoryRequest):
     保存された履歴をロードし、GenAI APIに反映してセッションを再構築
     """
     try:
-        messages = load_history(request.project, request.phase, request.session_id)
-        if not messages:
+        history_data = load_history(request.project, request.phase, request.session_id)
+        if not history_data["messages"]:
             return {"status": "no_history", "message": "履歴が存在しません"}
 
         # ロードした履歴とフェーズ設定でグローバルセッションを再構築
-        await create_or_resume_session(phase=request.phase, history=messages)
-        return {"status": "resumed", "message_count": len(messages)}
+        await create_or_resume_session(phase=history_data["phase"], history=history_data["messages"])
+        return {"status": "resumed", "message_count": len(history_data["messages"])}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"セッション再開失敗: {e}")
@@ -104,8 +104,8 @@ async def load_history_endpoint(request: HistoryRequest):
     画面表示用
     """
     try:
-        history = load_history(request.project, request.phase, request.session_id)
-        return {"messages": history}
+        history_data = load_history(request.project, request.phase, request.session_id)
+        return history_data # オブジェクト全体を返す
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"履歴ロード失敗: {e}")
 
