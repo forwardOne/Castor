@@ -37,8 +37,7 @@ function ChatPage() {
       <div className="flex flex-1 min-h-0 overflow-y-auto justify-center">
         <ChatHistory messages={displayedHistory ? displayedHistory.messages : messages} isLoading={isLoading} />
       </div>
-
-      <div className="py-4 flex-shrink-0">
+      <div className="flex-shrink-0">
         <ChatInput
           phase={displayedHistory ? displayedHistory.phase : (phase || 'default')}
           input={input}

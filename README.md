@@ -50,7 +50,7 @@
 - **ルーティング**: React Router
 - **UIライブラリ**: shadcn/ui
 - **スタイリング**: Tailwind CSS
-- **Markdownレンダリング**: react-markdown, remark-gfm
+- **Markdownレンダリング**: react-markdown, remark-gfm, rehype-highlight
 
 ## セットアップ手順
 
