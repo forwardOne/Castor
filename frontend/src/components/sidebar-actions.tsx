@@ -69,14 +69,14 @@ export function SidebarActions({ startNewChat }: SidebarActionsProps) {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
-            <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsNewChatDialogOpen(true)}>
+            <Button variant="ghost" className="w-full text-base justify-start hover:!bg-card" onClick={() => setIsNewChatDialogOpen(true)}>
               <SquarePen className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Chat</span>
             </Button>
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
-            <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsCreateProjectDialogOpen(true)}>
+            <Button variant="ghost" className="w-full text-base justify-start hover:!bg-card" onClick={() => setIsCreateProjectDialogOpen(true)}>
               <FolderPlus className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Project</span>
             </Button>
           </SidebarMenuButton>

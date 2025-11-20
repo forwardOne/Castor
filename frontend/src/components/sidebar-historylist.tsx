@@ -69,7 +69,7 @@ export function ProjectHistoryList({ displayHistory }: ProjectHistoryListProps) 
                           <div key={historyItem.id} className="flex items-center justify-between w-full pr-1 group">
                             <Button
                               variant="ghost"
-                              className="flex-1 justify-start h-auto px-2 py-1 text-xs"
+                              className="flex-1 justify-start h-auto px-5 py-1 text-xs hover:!bg-card"
                               onClick={() => displayHistory(projectData.name, historyItem.phase, historyItem.id)}
                             >
                               <span className="truncate">{historyItem.phase}_{historyItem.id.substring(0, 8)}...</span>
@@ -79,7 +79,7 @@ export function ProjectHistoryList({ displayHistory }: ProjectHistoryListProps) 
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100"
+                                  className="h-7 w-7 shrink-0 opacity-10 hover:opacity-100 transition-opacity"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MoreHorizontal className="h-3.5 w-3.5" />
