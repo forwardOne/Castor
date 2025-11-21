@@ -17,8 +17,8 @@ interface ChatHistoryProps {
 
 // チャット履歴がない場合のウェルカム画面
 const WelcomeScreen: React.FC = () => (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-        <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
+    <div className="flex flex-col h-full w-full items-center justify-center text-center mx-6">
+        <div className="flex text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
             Hello, User
         </div>
         <p className="text-2xl text-muted-foreground">What "root" shall we hack today?</p>
@@ -30,12 +30,12 @@ const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === MessageRole.USER;
 
   // ユーザーメッセージ(右寄せ、最大幅設定、その他設定もここで)
-  const userContainerClass = 'justify-end';
-  const userBubbleClass = 'max-w-ms lg:max-w-md gap-2 rounded-2xl px-4 py-2 mr-3 ml-auto text-[16px] leading-relaxed bg-accent text-accent-foreground space-y-4';
+  const userContainerClass = 'justify-end mt-6';
+  const userBubbleClass = 'max-w-ms lg:max-w-md gap-2 rounded-2xl px-5 py-3 ml-auto leading-relaxed bg-accent text-accent-foreground space-y-4';
 
   // モデルメッセージ(左寄せ、最大幅なし、その他設定もここで)
   const modelContainerClass = 'justify-start';
-  const modelBubbleClass = 'w-full gap-2 rounded-lg px-2 py-2 mr-3 text-[16px] leading-relaxed text-card-foreground space-y-6'; 
+  const modelBubbleClass = 'w-full gap-2 rounded-lg px-2 py-2 mr-1 leading-relaxed text-card-foreground space-y-6'; 
 
   return (
     <div className={`flex mb-6 ${isUser ? userContainerClass : modelContainerClass}`}>
@@ -77,7 +77,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isLoading })
 
   return (
     <ScrollArea className="flex-1">
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 mx-2 sm:mx-6 lg:mx-auto lg:max-w-3xl">
         {messages.map((msg) => (
           <ChatMessageBubble key={msg.id} message={msg} />
         ))}

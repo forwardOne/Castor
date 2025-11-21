@@ -29,50 +29,55 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   cancelHistoryDisplay,
 }) => {
   const placeholderText = disabled
-    ? "サイドバーから「New Chat」を選択してチャットを開始してください"
+    ? "サイドバーから「New Chat」を選択してください"
     : "メッセージを入力してください...";
 
   if (displayedHistory) {
     return (
-      <div className="flex flex-col border border-border rounded-2xl shadow-lg bg-muted py-4">
-        <div className="flex flex-col items-center justify-center p-2">
-          <p className="text-muted-foreground text-center">
-            履歴を表示中: プロジェクト「{displayedHistory.project}」フェーズ「{displayedHistory.phase}」
-          </p>
-          <div className="flex gap-2">
-            <Button onClick={resumeDisplayedHistory} disabled={isLoading}>
-              セッションを復元
-            </Button>
-            <Button variant="outline" onClick={cancelHistoryDisplay} disabled={isLoading}>
-              キャンセル
-            </Button>
+      <div className='pb-10'>
+        <div className="flex flex-col border border-border rounded-4xl shadow-lg bg-muted mx-2 sm:mx-6 lg:mx-auto lg:max-w-3xl">
+          <div className="flex flex-col items-center justify-center h-29 p-2">
+            <p className="text-muted-foreground text-center">
+              履歴を表示中: プロジェクト「{displayedHistory.project}」フェーズ「{displayedHistory.phase}」
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={resumeDisplayedHistory} disabled={isLoading}>
+                セッションを復元
+              </Button>
+              <Button variant="outline" onClick={cancelHistoryDisplay} disabled={isLoading}>
+                キャンセル
+              </Button>
+            </div>
           </div>
-        </div>
+      </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="flex flex-col border border-border rounded-2xl shadow-lg bg-card py-2">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={placeholderText}
-          disabled={disabled || isLoading}
-          className="!bg-transparent !text-base placeholder:text-ms text-card-foreground resize-none border-none focus-visible:ring-0 shadow-none min-h-[50px] p-2"
-        />
-
-        <div className="flex items-center p-1">
-          <div className="flex-grow"/>
-          <Button
-            type="submit"
-            size="icon"
-            className="rounded-full h-8 w-8"
-            disabled={disabled || isLoading || !input.trim()}
-          >
-            <ArrowUpIcon className="h-4 w-4" />
-          </Button>
+    <form onSubmit={handleSubmit} className="pb-10">
+      <div className="flex flex-col border border-border rounded-4xl shadow-lg bg-card mx-2 sm:mx-6 lg:mx-auto lg:max-w-3xl">
+        <div className='flex items-center pt-3 pl-3'>
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={placeholderText}
+            disabled={disabled || isLoading}
+            className="!bg-transparent !text-base placeholder:text-ms text-card-foreground resize-none border-none focus-visible:ring-0 shadow-none min-h-[56px]"
+          />
+        </div>
+        <div className="flex items-center pr-3 pb-3">
+          <div className="flex-grow" />
+          <div className='flex items-center justify-center'>
+            <Button
+              type="submit"
+              size="icon"
+              className="rounded-full h-9 w-9"
+              disabled={disabled || isLoading || !input.trim()}
+            >
+              <ArrowUpIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </form>

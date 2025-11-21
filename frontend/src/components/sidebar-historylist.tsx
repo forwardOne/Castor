@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Trash2, MoreHorizontal } from "lucide-react";
+import { Trash2, MoreVertical } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -66,23 +66,22 @@ export function ProjectHistoryList({ displayHistory }: ProjectHistoryListProps) 
                     ) : (
                       <div className="flex flex-col gap-1">
                         {projectData.histories.map((historyItem) => (
-                          <div key={historyItem.id} className="flex items-center justify-between w-full pr-1 group">
-                            <Button
-                              variant="ghost"
-                              className="flex-1 justify-start h-auto px-5 py-1 text-xs hover:!bg-card"
+                          <div key={historyItem.id} className="flex w-full items-center justify-between rounded-lg hover:bg-card group/card ">
+                            <div
+                              className="flex-1 justify-start h-auto px-5 py-1 text-xs"
                               onClick={() => displayHistory(projectData.name, historyItem.phase, historyItem.id)}
                             >
                               <span className="truncate">{historyItem.phase}_{historyItem.id.substring(0, 8)}...</span>
-                            </Button>
+                            </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 shrink-0 opacity-10 hover:opacity-100 transition-opacity"
+                                  className="h-7 w-7 shrink-0 opacity-0 group-hover/card:opacity-75 transition-opacity"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                  <MoreVertical className="h-3.5 w-3.5" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent side="right" align="center">

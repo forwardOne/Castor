@@ -33,8 +33,8 @@ function ChatPage() {
   } = useOutletContext<ChatContextType>();
 
   return (
-    <div className="flex flex-col h-full w-full mx-auto px-4 max-w-4xl 4xl:px-12">
-      <div className="flex flex-1 min-h-0 overflow-y-auto justify-center">
+    <div className="flex flex-col h-full w-full">
+      <div className="flex flex-1 min-h-0 overflow-y-auto">
         <ChatHistory messages={displayedHistory ? displayedHistory.messages : messages} isLoading={isLoading} />
       </div>
       <div className="flex-shrink-0">

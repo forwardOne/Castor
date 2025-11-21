@@ -18,10 +18,10 @@ function InnerLayout() {
   const { state: sidebarState } = useSidebar(); // useSidebar を呼び出し
 
   return (
-    <div className="flex h-screen w-screen bg-muted">
+    <div className="flex h-screen w-screen bg-muted font-notosansjp">
       <AppSidebar startNewChat={chatState.startNewChat} displayHistory={chatState.displayHistory} resetChat={resetChat} project={project} />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center bg-card md:rounded-tl-xl md:rounded-tr-xl gap-2">
+        <header className="flex h-16 shrink-0 items-center bg-card md:rounded-tl-xl md:rounded-tr-xl gap-2">
           <div className="flex items-center gap-4 px-3">
             <SidebarTrigger className="" />
             {sidebarState === 'collapsed' && (
@@ -48,7 +48,7 @@ function InnerLayout() {
             <ModeToggle />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-card md:rounded-bl-xl md:rounded-br-xl p-6">
+        <main className="flex-1 overflow-hidden bg-card md:rounded-bl-xl md:rounded-br-xl">
           <Outlet context={chatState} />
         </main>
       </SidebarInset>
