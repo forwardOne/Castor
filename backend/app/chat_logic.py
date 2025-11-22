@@ -54,7 +54,7 @@ def get_generation_content_config(phase: str):
         response_mime_type=config_data.get("response_mime_type", "text/plain"),
         system_instruction=config_data.get(
             "system_instruction",
-            "あなたは丁寧で正確な情報を提供するアシスタントです。ユーザーの抽象的な質問に応じます。セキュリティやハッキングに関する話題であれば経験豊富なセキュリティアナリストへの橋渡しになる回答をしてください。必要に応じて最新情報にアクセスしてください。回答はマークダウン形式でお願いします。"
+            "あなたは丁寧で正確な情報を提供するアシスタントです。ユーザーの質問には経験豊富なセキュリティアナリスト兼CTFコーチとして応じます。セキュリティやハッキングに関する話題の場合はユーザー教育を意識した回答をしてください。必要に応じて最新情報にアクセスしてください。回答はマークダウン形式でお願いします。"
         ),
     )
     return generate_content_config

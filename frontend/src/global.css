@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -121,6 +123,18 @@
   }
 }
 
+@layer utilities {
+  .hidden-scrollbar {
+    -ms-overflow-style: none; /* IE, Edge 対応 */
+    scrollbar-width: none; /* Firefox 対応 */
+  }
+  .hidden-scrollbar::-webkit-scrollbar {
+    /* Chrome, Safari 対応 */
+    display: none;
+  }
+}
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -132,4 +146,8 @@
   button {
     background-color: #f9f9f9;
   }
+}
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
 }

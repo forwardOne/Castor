@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FolderPlus, SquarePen } from "lucide-react";
+import { FolderPlus, SquarePen, PanelTopOpen, PanelTopClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,12 +23,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useProject } from "@/hooks/useProject";
+import { phaseLists } from "@/lib/phases";
 
 interface SidebarActionsProps {
   startNewChat: (project: string, phase: string) => void;
+  isHistoryVisible: boolean;
+  toggleHistoryVisibility: () => void;
 }
 
-export function SidebarActions({ startNewChat }: SidebarActionsProps) {
+export function SidebarActions({ startNewChat, isHistoryVisible, toggleHistoryVisibility }: SidebarActionsProps) {
   const {
     projects,
     newProjectName,
@@ -43,11 +46,8 @@ export function SidebarActions({ startNewChat }: SidebarActionsProps) {
   const [selectedProject, setSelectedProject] = React.useState<string>("");
   const [selectedPhase, setSelectedPhase] = React.useState<string>("default");
 
-  const phaseLists = [
-    "default", "1_Recon_Enumeration", "2_Vulnerability_Identification",
-    "3_Exploitation Preparation", "4_Initial_Foothold", "5_Exploitation",
-    "6_Privilege_Escalation", "7_Flag_Capture"
-  ];
+
+
 
   const handleStartChat = () => {
     if (!selectedProject) {
@@ -66,29 +66,46 @@ export function SidebarActions({ startNewChat }: SidebarActionsProps) {
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsNewChatDialogOpen(true)}>
-              <SquarePen className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Chat</span>
-            </Button>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Button variant="ghost" className="w-full text-base justify-start" onClick={() => setIsCreateProjectDialogOpen(true)}>
-              <FolderPlus className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Project</span>
-            </Button>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Button variant="ghost" className="w-full text-md justify-start hover:!bg-card !px-2" onClick={() => setIsNewChatDialogOpen(true)}>
+                <SquarePen className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Chat</span>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Button variant="ghost" className="w-full text-md justify-start hover:!bg-card !px-2" onClick={() => setIsCreateProjectDialogOpen(true)}>
+                <FolderPlus className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Project</span>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Button variant="ghost" className="flex w-full text-md justify-start hover:!bg-card !px-2" onClick={toggleHistoryVisibility}>
+                {isHistoryVisible ? (
+                  <PanelTopClose className="mr-2 h-4 w-4" />
+                ) : (
+                  <PanelTopOpen className="mr-2 h-4 w-4" />
+                )}
+                <span>History List</span>
+                <span className="group-data-[state=collapsed]:hidden text-xs text-muted-foreground pt-[1px]">
+                  {isHistoryVisible ? "" : "Click Open"}
+                </span>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </div>
 
       {/* "New Project" Dialog */}
       <Dialog open={isCreateProjectDialogOpen} onOpenChange={setIsCreateProjectDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>プロジェクト名を入力してください。</DialogDescription>
+            <DialogDescription>プロジェクト名を入力してください。例: "THM_OWASP_Top10"</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <Input id="newProjectName" placeholder="Project Name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
@@ -109,19 +126,27 @@ export function SidebarActions({ startNewChat }: SidebarActionsProps) {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <p className="text-sm text-muted-foreground">Project</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Project:</p>
+                <span className="text-xs text-muted-foreground ">(チャット開始には作成済のプロジェクトが必要です。)</span>
+              </div>
               <Select value={selectedProject} onValueChange={setSelectedProject}>
-                <SelectTrigger><SelectValue placeholder="Select a project" /></SelectTrigger>
+                <SelectTrigger className="w-full"><SelectValue placeholder="Select a project" /></SelectTrigger>
                 <SelectContent>{projects.map((p) => (<SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>))}</SelectContent>
               </Select>
             </div>
+            
             <div className="grid gap-2">
-              <p className="text-sm text-muted-foreground">Phase</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Phase: </p>
+                <span className="text-xs text-muted-foreground">(defaultは抽象的な対話用です。フェーズの指定を推奨します。)</span>
+              </div>
               <Select value={selectedPhase} onValueChange={setSelectedPhase}>
-                <SelectTrigger><SelectValue placeholder="Select a phase" /></SelectTrigger>
-                <SelectContent>{phaseLists.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}</SelectContent>
+                <SelectTrigger className="w-full"><SelectValue placeholder="Select a phase" /></SelectTrigger>
+                <SelectContent>{phaseLists.map((p) => (<SelectItem key={p} value={p}>{p.replace(/_/g, ' ')}</SelectItem>))}</SelectContent>
               </Select>
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsNewChatDialogOpen(false)}>Cancel</Button>

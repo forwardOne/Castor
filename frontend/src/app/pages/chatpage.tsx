@@ -33,12 +33,11 @@ function ChatPage() {
   } = useOutletContext<ChatContextType>();
 
   return (
-    <div className="flex flex-col h-full w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-1 min-h-0 overflow-y-auto justify-center">
+    <div className="flex flex-col h-full w-full">
+      <div className="flex flex-1 min-h-0 overflow-y-auto">
         <ChatHistory messages={displayedHistory ? displayedHistory.messages : messages} isLoading={isLoading} />
       </div>
-
-      <div className="py-4 flex-shrink-0">
+      <div className="flex-shrink-0">
         <ChatInput
           phase={displayedHistory ? displayedHistory.phase : (phase || 'default')}
           input={input}

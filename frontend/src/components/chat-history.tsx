@@ -4,8 +4,11 @@ import { MessageRole } from '../types/types';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { okaidia } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import rehypeHighlight from "rehype-highlight"; // シンタックスハイライト
+import "highlight.js/styles/github-dark-dimmed.css"; // ハイライトテーマ
+import { CodeBlock } from "@/components/code-block"; // コードブロック
+import { PhaseDescriptions } from "@/components/phase-descriptions";
+
 
 // interface
 interface ChatHistoryProps {
@@ -15,11 +18,12 @@ interface ChatHistoryProps {
 
 // チャット履歴がない場合のウェルカム画面
 const WelcomeScreen: React.FC = () => (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-        <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
-            Hello, User
-        </div>
-        <p className="text-2xl text-muted-foreground">What "root" shall we hack today?</p>
+    <div className="flex flex-col h-full w-full items-center justify-center text-center pt-20 pb-4">
+      <div className="text-6xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-2">
+          Hello, User
+      </div>
+      <p className="text-xl text-muted-foreground mb-4">What "root" shall we hack today?</p>
+      <PhaseDescriptions />
     </div>
 );
 
@@ -28,12 +32,12 @@ const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === MessageRole.USER;
 
   // ユーザーメッセージ(右寄せ、最大幅設定、その他設定もここで)
-  const userContainerClass = 'justify-end';
-  const userBubbleClass = 'max-w-ms lg:max-w-md gap-2 rounded-2xl px-4 py-2 mr-3 text-[16px] leading-8 bg-accent text-accent-foreground ml-auto';
+  const userContainerClass = 'justify-end mt-6';
+  const userBubbleClass = 'max-w-ms lg:max-w-md gap-2 rounded-2xl px-5 py-3 ml-auto leading-relaxed bg-accent text-accent-foreground space-y-4';
 
   // モデルメッセージ(左寄せ、最大幅なし、その他設定もここで)
   const modelContainerClass = 'justify-start';
-  const modelBubbleClass = 'w-full gap-2 rounded-lg px-2 py-2 mr-3 text-[16px] leading-relaxed text-card-foreground space-y-6'; 
+  const modelBubbleClass = 'w-full gap-2 rounded-lg px-2 py-2 mr-1 leading-relaxed text-card-foreground space-y-6'; 
 
   return (
     <div className={`flex mb-6 ${isUser ? userContainerClass : modelContainerClass}`}>
@@ -47,24 +51,9 @@ const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
           components={{
-            code({ node, inline, className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || '');
-              return !inline && match ? (
-                <SyntaxHighlighter
-                  style={okaidia}
-                  language={match[1]}
-                  PreTag="div"
-                  {...props}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              ) : (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              );
-            },
+            code: CodeBlock, // コードブロック処理
           }}
         >
           {message.parts[0].text}
@@ -85,12 +74,18 @@ const LoadingIndicator = () => (
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isLoading }) => {
   if (messages.length === 0 && !isLoading) {
-    return <WelcomeScreen />;
+    return (
+      <ScrollArea className="flex-1">
+        <div className="flex mx-2 mx-auto max-w-lg">
+          <WelcomeScreen />
+        </div>
+    </ScrollArea>
+    );
   }
 
   return (
     <ScrollArea className="flex-1">
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 mx-2 sm:mx-6 lg:mx-auto lg:max-w-3xl">
         {messages.map((msg) => (
           <ChatMessageBubble key={msg.id} message={msg} />
         ))}
