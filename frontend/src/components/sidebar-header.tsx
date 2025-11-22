@@ -35,14 +35,14 @@ export function SidebarHeader({ project, resetChat }: SidebarHeaderProps) {
   return (
     <>
       <div
-        className="group flex h-14 shrink-0 items-center justify-start px-4 gap-2 border-b border-border cursor-pointer"
+        className="group flex h-14 shrink-0 items-center justify-start px-3 gap-3 border-b border-border cursor-pointer"
         onClick={handleGoHome}
       >
         <Shield className="h-6 w-6 text-sidebar-foreground"/>
-        <span className="group-data-[state=collapsed]:hidden leading-3">
-          <span className="inline-block text-xl font-bold text-sidebar-foreground">CASTOR</span><br />
+        <div className="group-data-[state=collapsed]:hidden leading-1">
+          <span className="inline-block text-2xl font-semibold text-sidebar-foreground">CASTOR</span><br />
           <span className="text-xs text-muted-foreground">AI Pentest Assistant</span>
-        </span>
+        </div>
       </div>
 
       <AlertDialog open={isHomeAlertOpen} onOpenChange={setIsHomeAlertOpen}>

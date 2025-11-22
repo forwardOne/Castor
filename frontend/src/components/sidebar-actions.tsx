@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FolderPlus, SquarePen } from "lucide-react";
+import { FolderPlus, SquarePen, PanelTopOpen, PanelTopClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,9 +26,11 @@ import { useProject } from "@/hooks/useProject";
 
 interface SidebarActionsProps {
   startNewChat: (project: string, phase: string) => void;
+  isHistoryVisible: boolean;
+  toggleHistoryVisibility: () => void;
 }
 
-export function SidebarActions({ startNewChat }: SidebarActionsProps) {
+export function SidebarActions({ startNewChat, isHistoryVisible, toggleHistoryVisibility }: SidebarActionsProps) {
   const {
     projects,
     newProjectName,
@@ -66,19 +68,34 @@ export function SidebarActions({ startNewChat }: SidebarActionsProps) {
 
   return (
     <>
-      <div >
+      <div>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Button variant="ghost" className="w-full text-base justify-start hover:!bg-card" onClick={() => setIsNewChatDialogOpen(true)}>
+              <Button variant="ghost" className="w-full text-md justify-start hover:!bg-card !px-2" onClick={() => setIsNewChatDialogOpen(true)}>
                 <SquarePen className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Chat</span>
               </Button>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Button variant="ghost" className="w-full text-base justify-start hover:!bg-card" onClick={() => setIsCreateProjectDialogOpen(true)}>
+              <Button variant="ghost" className="w-full text-md justify-start hover:!bg-card !px-2" onClick={() => setIsCreateProjectDialogOpen(true)}>
                 <FolderPlus className="mr-2 h-4 w-4" /> <span className="group-data-[state=collapsed]:hidden">New Project</span>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Button variant="ghost" className="flex w-full text-md justify-start hover:!bg-card !px-2" onClick={toggleHistoryVisibility}>
+                {isHistoryVisible ? (
+                  <PanelTopClose className="mr-2 h-4 w-4" />
+                ) : (
+                  <PanelTopOpen className="mr-2 h-4 w-4" />
+                )}
+                <span>History List</span>
+                <span className="group-data-[state=collapsed]:hidden text-lg text-muted-foreground">
+                  {isHistoryVisible ? "<" : ">"}
+                </span>
               </Button>
             </SidebarMenuButton>
           </SidebarMenuItem>
