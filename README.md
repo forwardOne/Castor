@@ -163,3 +163,7 @@ start.bat
 - プロジェクトルートに`images`ディレクトリを作成し、スクリーンショットを移動。
 - `README.md`内の画像パスをローカルの`images`ディレクトリを参照するように更新。
 - ウェルカム画面にフェーズ説明を追加。
+
+## License
+
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
