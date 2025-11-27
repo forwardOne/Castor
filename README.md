@@ -133,7 +133,7 @@ This project is licensed under the Apache License, Version 2.0. See the [LICENSE
 - READMEへのアーキテクチャ図の追加。
 
 - ~~業務的なチケット化・スコープ管理を意識したが、個人開発では難しい部分が多かった。~~  
-→セルフでIssueを立てるようにした。
+→Issueを立てセルフレビューをするようにした。
 - ~~テストコードでの実施が課題。自動化も含め勉強の必要性を感じている。~~  
 →Pytest,Vitestの導入とGithub Actionsを試している
 
