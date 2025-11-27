@@ -28,7 +28,7 @@ const WelcomeScreen: React.FC = () => (
 );
 
 // チャットメッセージバブル
-const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+export const ChatMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === MessageRole.USER;
 
   // ユーザーメッセージ(右寄せ、最大幅設定、その他設定もここで)
