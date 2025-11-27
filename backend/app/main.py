@@ -3,6 +3,7 @@
 import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from .schemas import ChatRequest, HistoryRequest, CreateProjectRequest, NewSessionRequest
 from .chat_logic import (
     init_chat_on_startup,
@@ -17,9 +18,15 @@ from .storage_logic import (
     delete_project, delete_history
     )
 
+# --- Lifespan pytestに推奨された ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_chat_on_startup()
+    yield
 
 # --- FastAPI ---
 app = FastAPI()
+
 
 # --- CORS(React/Vite) ---
 origins = [
@@ -33,10 +40,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# --- Init and Session Persistence ---
-init_chat_on_startup()
 
 
 # --- Endpoints ---
