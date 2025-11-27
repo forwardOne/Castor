@@ -72,7 +72,7 @@ cd castor
 - プロジェクトルート (`castor/`) に `.env` ファイルを作成し、Google AI Studioから取得したAPIキーを設定します。
 - APIを無料枠で使用する場合、2.5-flashモデルの仕様を推奨します。
 ```
-GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY_HERE"
+GEMINI_API_KEY="YOUR_API_KEY_HERE"
 ```
 
 ### 3. バックエンドのセットアップと起動
@@ -179,5 +179,5 @@ This project is licensed under the Apache License, Version 2.0. See the [LICENSE
 
 **2025-11-27**:
 - テストコードの導入
-
+- GitHub ActionsのCIワークフローを追加
 </details>
